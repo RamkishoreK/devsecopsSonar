@@ -1,5 +1,5 @@
 # tests/test_dummy.py
-import main
+import src.main
 
 def test_dummy():
     assert True
