@@ -1,48 +1,92 @@
+"""
+-------------------------------------------------------------
+WARNING: This file is intentionally vulnerable.
+It exists ONLY for testing SonarQube / SonarCloud SAST tools.
+DO NOT use in any real application.
+-------------------------------------------------------------
+"""
+
 import os
-import logging
-
-# ❌ Hard-coded secret (Sonar will flag this)
-API_KEY = "12345-SECRET-API-KEY"
-
-# ❌ Logging configuration exposing sensitive info
-logging.basicConfig(level=logging.DEBUG)
+import sqlite3
+import subprocess
+import hashlib
+import random
 
 
-def insecure_calculate(expression):
-    # ❌ Using eval() directly — Code Injection Vulnerability
-    logging.debug(f"Evaluating: {expression}")  # ❌ Sensitive info in logs
-    try:
-        return eval(expression)  # Vulnerable
-    except Exception as e:
-        # ❌ Bad practice: printing internal error details
-        print("Error occurred:", e)
-        return None
+# -------------------------------------------------------------
+# Hardcoded secret (S2068)
+# -------------------------------------------------------------
+API_KEY = "12345-very-insecure-api-key"   # Sonar should flag this
 
 
-def save_result_to_file(result):
-    # ❌ No validation, writes arbitrary data
-    with open("results.txt", "a") as f:
-        f.write(str(result) + "\n")
+# -------------------------------------------------------------
+# SQL Injection (S3649)
+# -------------------------------------------------------------
+def get_user_password(db_path, username):
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+
+    # ❌ Vulnerable: direct string concatenation
+    query = f"SELECT password FROM users WHERE username = '{username}';"
+    print("Executing SQL:", query)
+
+    cur.execute(query)  # Sonar should flag this
+    result = cur.fetchone()
+    conn.close()
+    return result
 
 
-def insecure_menu():
-    print("=== Vulnerable Calculator ===")
-    print("Enter any Python expression to evaluate")
-    print("Example: 2+3 or __import__('os').system('rm -rf /')")
-
-    # ❌ No input sanitization
-    user_input = input("Enter expression: ")
-
-    result = insecure_calculate(user_input)
-
-    if result is not None:
-        print("Result:", result)
-        save_result_to_file(result)  # ❌ Writes untrusted data to file
-    else:
-        print("Calculation failed")
+# -------------------------------------------------------------
+# Command Injection (S4721)
+# -------------------------------------------------------------
+def run_ping(host):
+    # ❌ Vulnerable: user-controlled shell command
+    cmd = "ping -c 1 " + host
+    return subprocess.check_output(cmd, shell=True)  # Sonar should flag
 
 
+# -------------------------------------------------------------
+# Insecure eval (S2076 / S5334)
+# -------------------------------------------------------------
+def calc_user_expression(expr):
+    # ❌ Vulnerable: runs arbitrary Python
+    return eval(expr)
+
+
+# -------------------------------------------------------------
+# Path Traversal (S2083)
+# -------------------------------------------------------------
+def read_any_file(filename):
+    # ❌ No validation
+    with open(filename, "r") as f:
+        return f.read()
+
+
+# -------------------------------------------------------------
+# Weak hashing (S4790)
+# -------------------------------------------------------------
+def weak_hash(data):
+    # ❌ Weak MD5 hash
+    return hashlib.md5(data.encode()).hexdigest()
+
+
+# -------------------------------------------------------------
+# Predictable random (S2245)
+# -------------------------------------------------------------
+def insecure_token():
+    # ❌ Not cryptographically secure
+    return str(random.randint(100000, 999999))
+
+
+# -------------------------------------------------------------
+# MAIN (for demonstration)
+# -------------------------------------------------------------
 if __name__ == "__main__":
-    # ❌ Debug mode intentionally enabled
-    print("API Key in use:", API_KEY)
-    insecure_menu()
+    print("=== Vulnerable Python File for Sonar Testing ===")
+
+    print(get_user_password("example.db", "admin' OR '1'='1"))
+    print(run_ping("127.0.0.1"))
+    print(calc_user_expression("2 + 5"))
+    print(read_any_file("/etc/passwd"))
+    print(weak_hash("password"))
+    print(insecure_token())
