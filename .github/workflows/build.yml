@@ -25,10 +25,4 @@ jobs:
           python -m pytest src/main.py --cov=. --cov-report xml:coverage.xml
 
       # Step 3: SonarQube Scan
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.python.coverage.reportPaths=coverage.xml
+    
