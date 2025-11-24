@@ -58,7 +58,7 @@ jobs:
       # Step 7: Run Docker Container (Expose Port 8000)
       - name: Run Docker Container
         run: |
-          docker run -d -p 8000:8001 --name adrenolad myapp:latest
+          docker run -d -p 8888:8001 --name adrenolad myapp:latest
           sleep 10
 
       # Step 8: OWASP ZAP Baseline Scan
@@ -69,7 +69,7 @@ jobs:
             -v $(pwd):/zap/wrk \
             --network="host" \
             zaproxy/zap-stable zap-baseline.py \
-            -t http://localhost:8000 \
+            -t http://localhost:8888 \
             -r zap_report.html
 
       # Step 10: Upload OWASP ZAP Report
