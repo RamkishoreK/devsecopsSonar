@@ -43,7 +43,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=RamkishoreK_devsecopsSonar
-            -Dsonar.organization=RamkishoreK
+            -Dsonar.organization=ramkishorek
             -Dsonar.sources=src
             -Dsonar.python.coverage.reportPaths=coverage.xml
         env:
