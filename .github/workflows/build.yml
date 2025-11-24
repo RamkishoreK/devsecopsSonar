@@ -61,7 +61,31 @@ jobs:
           docker run -d -p 8888:8001 --name adrenolad myapp:latest
           sleep 10
 
-    
+      
+      # 8. Run OWASP ZAP baseline scan
+      - run: |
+          mkdir zap-output
+          chmod 777 zap-output 
+          docker run --rm --network zapnet \
+          -v $(pwd)/zap-output:/zap/wrk \
+          ghcr.io/zaproxy/zaproxy:stable \
+          /zap/zap-baseline.py \
+          -t http://fastapi-app:8000 \
+          --autooff \
+          -I \
+          -x zap-report.xml \
+          -r zap-report.html \
+          -J zap-report.json \
+          -w zap-warnings.md
+
+
+      # 9. Upload ZAP report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap-output/*
+
+          
       # Step 11: Stop Container
       - name: Stop Container
         run: |
