@@ -16,7 +16,7 @@ import random
 # -------------------------------------------------------------
 # Hardcoded secret (S2068)
 # -------------------------------------------------------------
-API_KEY = "12345-very-insecure-api-key"   # Sonar should flag this
+API_KEY = "12345-very-insecure-api-key123"   # Sonar should flag this
 
 
 # -------------------------------------------------------------
