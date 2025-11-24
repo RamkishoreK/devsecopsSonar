@@ -1,27 +1,48 @@
-# Simple Calculator Program
+import os
+import logging
 
-print("Simple Calculator")
-print("Choose an operation:")
-print("1. Add")
-print("2. Subtract")
-print("3. Multiply")
-print("4. Divide")
+# ❌ Hard-coded secret (Sonar will flag this)
+API_KEY = "12345-SECRET-API-KEY"
 
-choice = input("Enter choice (1/2/3/4): ")
+# ❌ Logging configuration exposing sensitive info
+logging.basicConfig(level=logging.DEBUG)
 
-num1 = float(input("Enter first number: "))
-num2 = float(input("Enter second number: "))
 
-if choice == '1':
-    print("Result:", num1 + num2)
-elif choice == '2':
-    print("Result:", num1 - num2)
-elif choice == '3':
-    print("Result:", num1 * num2)
-elif choice == '4':
-    if num2 != 0:
-        print("Result:", num1 / num2)
+def insecure_calculate(expression):
+    # ❌ Using eval() directly — Code Injection Vulnerability
+    logging.debug(f"Evaluating: {expression}")  # ❌ Sensitive info in logs
+    try:
+        return eval(expression)  # Vulnerable
+    except Exception as e:
+        # ❌ Bad practice: printing internal error details
+        print("Error occurred:", e)
+        return None
+
+
+def save_result_to_file(result):
+    # ❌ No validation, writes arbitrary data
+    with open("results.txt", "a") as f:
+        f.write(str(result) + "\n")
+
+
+def insecure_menu():
+    print("=== Vulnerable Calculator ===")
+    print("Enter any Python expression to evaluate")
+    print("Example: 2+3 or __import__('os').system('rm -rf /')")
+
+    # ❌ No input sanitization
+    user_input = input("Enter expression: ")
+
+    result = insecure_calculate(user_input)
+
+    if result is not None:
+        print("Result:", result)
+        save_result_to_file(result)  # ❌ Writes untrusted data to file
     else:
-        print("Error: Cannot divide by zero")
-else:
-    print("Invalid choice")
+        print("Calculation failed")
+
+
+if __name__ == "__main__":
+    # ❌ Debug mode intentionally enabled
+    print("API Key in use:", API_KEY)
+    insecure_menu()
